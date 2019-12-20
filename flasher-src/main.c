@@ -23,33 +23,33 @@
 
 void nrf_save_data(uint8_t * buf, uint16_t count, uint8_t * fname)
 {
-	size_t size_writed = 0, idx = 0;
-	FILE * fd;
+  size_t size_writed = 0, idx = 0;
+  FILE * fd;
 
-	fd = fopen(fname, "w");
+  fd = fopen(fname, "w");
 
-	while(idx < count)
-	{
-		size_writed = fwrite(&buf[idx], 1, (count - idx), fd);
-		idx = size_writed + idx;
-	}
-	fclose(fd);
+  while(idx < count)
+  {
+    size_writed = fwrite(&buf[idx], 1, (count - idx), fd);
+    idx = size_writed + idx;
+  }
+  fclose(fd);
 }
 
 void nrf_restore_data(uint8_t * buf, uint16_t count, uint8_t * fname)
 {
-	FILE * fd;
-	fd = fopen(fname, "r");
-	fread(buf, 1, count, fd);
-	fclose(fd);
+  FILE * fd;
+  fd = fopen(fname, "r");
+  fread(buf, 1, count, fd);
+  fclose(fd);
 }
 // ------
 static void usage(char *name)
 {
-    fprintf(stderr, "Прошивка nRF24LE1 через USBasp.  http://homes-smart.ru/\nОснован на https://github.com/derekstavis/nrf24le1-libbcm2835\nusage:\n");
-    fprintf(stderr, " %s test -информация\n", name);
-    fprintf(stderr, " %s write -запись прошивки файла main.bin.\n", name);
-    fprintf(stderr, " %s read -чтение прошивки в файл main-dump.bin.\n", name);
+  fprintf(stderr, "Прошивка nRF24LE1 через USBasp.  http://homes-smart.ru/\nОснован на https://github.com/derekstavis/nrf24le1-libbcm2835\nusage:\n");
+  fprintf(stderr, " %s test -информация\n", name);
+  fprintf(stderr, " %s write -запись прошивки файла main.bin.\n", name);
+  fprintf(stderr, " %s read -чтение прошивки в файл main-dump.bin.\n", name);
 }
 
 
@@ -65,68 +65,68 @@ int                 cnt;
 //-----------------------------------------------------------
 int main(int argc, char **argv)
 {
-//usb_dev_handle      *handle = NULL;
-const unsigned char rawVid[2] = {USB_CFG_VENDOR_ID}, rawPid[2] = {USB_CFG_DEVICE_ID};
-char                vendor[] = {USB_CFG_VENDOR_NAME, 0}, product[] = {USB_CFG_DEVICE_NAME, 0};
-//char                buffer[8];
+  //usb_dev_handle      *handle = NULL;
+  const unsigned char rawVid[2] = {USB_CFG_VENDOR_ID}, rawPid[2] = {USB_CFG_DEVICE_ID};
+  char                vendor[] = {USB_CFG_VENDOR_NAME, 0}, product[] = {USB_CFG_DEVICE_NAME, 0};
+  //char                buffer[8];
 
-int                  vid, pid;
+  int                  vid, pid;
 
-    usb_init();
-    if(argc < 2){   /* we need at least one argument */
-        usage(argv[0]);
-        exit(1);
-    }
-    /* compute VID/PID from usbconfig.h so that there is a central source of information */
-    vid = rawVid[1] * 256 + rawVid[0];
-    pid = rawPid[1] * 256 + rawPid[0];
-    /* The following function is in opendevice.c: */
-    if(usbOpenDevice(&handle, vid, vendor, pid, product, NULL, NULL, NULL) != 0){
-        fprintf(stderr, "Could not find USB device \"%s\" with vid=0x%x pid=0x%x\n", product, vid, pid);
-        exit(1);
-    }
-    
-    
-    	uint8_t bufread[17000];
-	unsigned long off = 0;
-	size_t count =16384;
-
-	memset(bufread, 0, sizeof(bufread));
-
-	nrf24le1_init();
-
-	enable_program(1);
-
-	if(strcasecmp(argv[1], "test") == 0) da_test_show();
-	   
-	else
-	if(strcasecmp(argv[1], "write") == 0){
-
-	nrf_restore_data(bufread, count, "./main.bin");
-	uhet_write(bufread, 16384, &off);
+  usb_init();
+  if(argc < 2){   /* we need at least one argument */
+    usage(argv[0]);
+    exit(1);
+  }
+  /* compute VID/PID from usbconfig.h so that there is a central source of information */
+  vid = rawVid[1] * 256 + rawVid[0];
+  pid = rawPid[1] * 256 + rawPid[0];
+  /* The following function is in opendevice.c: */
+  if(usbOpenDevice(&handle, vid, vendor, pid, product, NULL, NULL, NULL) != 0){
+    fprintf(stderr, "Could not find USB device \"%s\" with vid=0x%x pid=0x%x\n", product, vid, pid);
+    exit(1);
+  }
 
 
-	} else 
-	if(strcasecmp(argv[1], "read") == 0){
+  uint8_t bufread[17000];
+  unsigned long off = 0;
+  size_t count =16384;
+
+  memset(bufread, 0, sizeof(bufread));
+
+  nrf24le1_init();
+
+  enable_program(1);
+
+  if(strcasecmp(argv[1], "test") == 0) da_test_show();
+
+  else
+    if(strcasecmp(argv[1], "write") == 0){
+
+      nrf_restore_data(bufread, count, "./main.bin");
+      uhet_write(bufread, 16384, &off);
 
 
-	memset(bufread, 0, sizeof(bufread));
-	uhet_read(bufread, count, &off);
+    } else 
+      if(strcasecmp(argv[1], "read") == 0){
 
-	nrf_save_data(bufread, count, "./main-dump.bin");
 
-	}
+        memset(bufread, 0, sizeof(bufread));
+        uhet_read(bufread, count, &off);
 
-	//da_erase_all_store();
+        nrf_save_data(bufread, count, "./main-dump.bin");
 
-	enable_program(0);
+      }
 
-	wiring_destroy();
-    
-    
-    
-    usb_close(handle);
-    return 0;
+  //da_erase_all_store();
+
+  enable_program(0);
+
+  wiring_destroy();
+
+
+
+  usb_close(handle);
+  return 0;
 }
 
 

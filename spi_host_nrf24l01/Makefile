@@ -22,13 +22,13 @@ EXE_SUFFIX =
 #EXE_SUFFIX = .exe
 # -Wall
 
-NAME = nrf24le1
+NAME = main
 
-OBJECTS = opendevice.o main.o
+OBJECTS = opendevice.o main.o usbspi.o
 
 CC		= gcc
 CFLAGS	= $(CPPFLAGS) $(USBFLAGS) -O -g 
-LIBS	= $(USBLIBS)
+LIBS	= $(USBLIBS) rf/src/*.o
 
 PROGRAM = $(NAME)$(EXE_SUFFIX)
 
